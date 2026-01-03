@@ -14,14 +14,17 @@ def get_coordinates(n_points, shift_x, shift_y, region_size):
 
     return list(zip(x,y))
 
-def stripple_image(sampling_size: int, n_groups: int):
-    kernel_avarage = np.ones((sampling_size,sampling_size))/(sampling_size**2)
-    convolution = sig.convolve(kernel_avarage, img[::sampling_size, ::sampling_size], mode="valid")
+def stipple_image(sampling_size: int, n_groups: int):
+    kernel_average = np.ones((sampling_size,sampling_size))/(sampling_size**2)
+    convolution_tmp = sig.convolve(img, kernel_average)
+
+    # only keep every sampling_size "n" value
+    convolution = convolution_tmp[::sampling_size, ::sampling_size]
 
     print(f"Size of original image: {img.shape}")
     print(f"SIze of convolution: {convolution.shape}")
 
-    # use value of pixel avarage to generate n coordainates for each region of the image
+    # use value of pixel average to generate n coordinates for each region of the image
     conv_height, conv_width = convolution.shape
     coordinates = []
     for column in range(conv_width):
@@ -76,12 +79,14 @@ if __name__ == "__main__":
     SAMPLING_SIZE = 10
     GROUPS_NMBR = 10
 
-    img = mpimg.imread(PATH)
+    # img = mpimg.imread(PATH)
+
+    img = np.array(Image.open(PATH).convert('L'))
     WIDTH, HEIGHT = img.shape
 
-    coordinates = stripple_image(SAMPLING_SIZE, GROUPS_NMBR)
+    coordinates = stipple_image(SAMPLING_SIZE, GROUPS_NMBR)
 
-    stippling_img = plt.scatter(coordinates[:,0], coordinates[:,1],s=1)
+    stippling_img = plt.scatter(coordinates[:,0], coordinates[:,1],s=3)
     plt.show()
 
     plt.imshow(img, cmap="bone")
@@ -101,5 +106,5 @@ if __name__ == "__main__":
         # get point shifts
         coordinates = calculate_point_shift(vor, img)
 
-    stippling_img = plt.scatter(coordinates[:,0], coordinates[:,1],s=1)
+    stippling_img = plt.scatter(coordinates[:,0], coordinates[:,1],s=3)
     plt.show()
